@@ -1,50 +1,44 @@
-﻿using System;
+﻿using CalculatorApp.Interfaces;
+using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CalculatorApp
 {
     public partial class CalculatorForm : Form
     {
-        private string _firstFilePath;
-        private string _secondFilePath;
-        private bool _filesImported;
-        private AddHandler _addHandler;
+        INumberValidator _validator;
 
         public CalculatorForm()
         {
             InitializeComponent();
-            _addHandler = new AddHandler();
-        }
-
-        private void btnSelectFiles_Click(object sender, EventArgs e)
-        {
-            if (openFileDialog.ShowDialog() != DialogResult.OK)
-            {
-                return;
-            }
-
-            if (openFileDialog.FileNames.Length != 2)
-            {
-                MessageBox.Show("Please select two text files!");
-                return;
-            }
-
-            _firstFilePath = openFileDialog.FileNames[0];
-            _secondFilePath = openFileDialog.FileNames[1];
-            _filesImported = true;
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            if (!_filesImported)
+            _validator = new IntNumberValidator(textBoxFirstNumber.Text);
+            if (!_validator.Validate())
             {
-                MessageBox.Show("Please import files first.");
+                MessageBox.Show("First number is not valid.");
+                return;
+            }
+
+            _validator = new IntNumberValidator(textBoxSecondNumber.Text);
+            if (!_validator.Validate())
+            {
+                MessageBox.Show("Second number is not valid.");
                 return;
             }
 
             try
             {
-                textBoxResult.Text = _addHandler.Add(_firstFilePath, _secondFilePath);
+                IOperator firstOperator = new IntOperator(textBoxFirstNumber.Text);
+                IOperator secondOperator = new IntOperator(textBoxSecondNumber.Text);
+
+                IOperation add = new AddOperation(firstOperator, secondOperator);
+                ICalculator calculator = new IntCalculator(add);
+
+                textBoxResult.Text = calculator.Add();
             }
             catch (Exception ex)
             {

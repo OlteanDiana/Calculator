@@ -29,9 +29,11 @@
         private void InitializeComponent()
         {
             this.buttonAdd = new System.Windows.Forms.Button();
-            this.btnSelectFiles = new System.Windows.Forms.Button();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.textBoxResult = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxFirstNumber = new System.Windows.Forms.TextBox();
+            this.textBoxSecondNumber = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // buttonAdd
@@ -46,26 +48,6 @@
             this.buttonAdd.UseVisualStyleBackColor = true;
             this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
             // 
-            // btnSelectFiles
-            // 
-            this.btnSelectFiles.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.btnSelectFiles.Location = new System.Drawing.Point(12, 24);
-            this.btnSelectFiles.Name = "btnSelectFiles";
-            this.btnSelectFiles.Size = new System.Drawing.Size(145, 42);
-            this.btnSelectFiles.TabIndex = 2;
-            this.btnSelectFiles.Text = "Select files";
-            this.btnSelectFiles.UseVisualStyleBackColor = true;
-            this.btnSelectFiles.Click += new System.EventHandler(this.btnSelectFiles_Click);
-            // 
-            // openFileDialog
-            // 
-            this.openFileDialog.DefaultExt = "txt";
-            this.openFileDialog.FileName = "openFileDialog";
-            this.openFileDialog.Filter = "txt files (*.txt)|*.txt";
-            this.openFileDialog.FilterIndex = 2;
-            this.openFileDialog.Multiselect = true;
-            this.openFileDialog.RestoreDirectory = true;
-            // 
             // textBoxResult
             // 
             this.textBoxResult.AcceptsReturn = true;
@@ -75,13 +57,51 @@
             this.textBoxResult.Size = new System.Drawing.Size(666, 192);
             this.textBoxResult.TabIndex = 3;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 13);
+            this.label1.Name = "label1";
+            this.label1.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.label1.Size = new System.Drawing.Size(126, 25);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "First number:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(15, 54);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(157, 25);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Second number:";
+            // 
+            // textBoxFirstNumber
+            // 
+            this.textBoxFirstNumber.Location = new System.Drawing.Point(192, 16);
+            this.textBoxFirstNumber.Name = "textBoxFirstNumber";
+            this.textBoxFirstNumber.Size = new System.Drawing.Size(486, 22);
+            this.textBoxFirstNumber.TabIndex = 6;
+            // 
+            // textBoxSecondNumber
+            // 
+            this.textBoxSecondNumber.Location = new System.Drawing.Point(192, 58);
+            this.textBoxSecondNumber.Name = "textBoxSecondNumber";
+            this.textBoxSecondNumber.Size = new System.Drawing.Size(486, 22);
+            this.textBoxSecondNumber.TabIndex = 7;
+            // 
             // CalculatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(690, 405);
+            this.Controls.Add(this.textBoxSecondNumber);
+            this.Controls.Add(this.textBoxFirstNumber);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxResult);
-            this.Controls.Add(this.btnSelectFiles);
             this.Controls.Add(this.buttonAdd);
             this.Name = "CalculatorForm";
             this.Text = "Calculator";
@@ -92,9 +112,11 @@
 
         #endregion
         private System.Windows.Forms.Button buttonAdd;
-        private System.Windows.Forms.Button btnSelectFiles;
-        private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.TextBox textBoxResult;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBoxFirstNumber;
+        private System.Windows.Forms.TextBox textBoxSecondNumber;
     }
 }
 
