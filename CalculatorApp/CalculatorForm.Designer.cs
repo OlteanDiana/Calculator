@@ -34,6 +34,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.textBoxFirstNumber = new System.Windows.Forms.TextBox();
             this.textBoxSecondNumber = new System.Windows.Forms.TextBox();
+            this.buttonSubstract = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonAdd
@@ -92,11 +93,24 @@
             this.textBoxSecondNumber.Size = new System.Drawing.Size(486, 22);
             this.textBoxSecondNumber.TabIndex = 7;
             // 
+            // buttonSubstract
+            // 
+            this.buttonSubstract.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.buttonSubstract.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.buttonSubstract.Location = new System.Drawing.Point(113, 98);
+            this.buttonSubstract.Name = "buttonSubstract";
+            this.buttonSubstract.Size = new System.Drawing.Size(75, 73);
+            this.buttonSubstract.TabIndex = 8;
+            this.buttonSubstract.Text = "-";
+            this.buttonSubstract.UseVisualStyleBackColor = true;
+            this.buttonSubstract.Click += new System.EventHandler(this.buttonSubstract_Click);
+            // 
             // CalculatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(690, 405);
+            this.Controls.Add(this.buttonSubstract);
             this.Controls.Add(this.textBoxSecondNumber);
             this.Controls.Add(this.textBoxFirstNumber);
             this.Controls.Add(this.label2);
@@ -117,6 +131,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBoxFirstNumber;
         private System.Windows.Forms.TextBox textBoxSecondNumber;
+        private System.Windows.Forms.Button buttonSubstract;
     }
 }
 
