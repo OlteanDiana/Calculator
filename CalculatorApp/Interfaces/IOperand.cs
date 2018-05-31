@@ -3,6 +3,7 @@
     public interface IOperand<T>
     {
         char GetSign();
-        string GetOperandAsString();
+        string GetOperand();
+        string GetOperandWithoutSign();
     }
 }

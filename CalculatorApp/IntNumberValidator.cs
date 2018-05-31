@@ -14,7 +14,7 @@ namespace CalculatorApp
 
         public bool Validate()
         {
-            return Regex.IsMatch(_number, "^[-+]?[0-9]+$");
+            return Regex.IsMatch(_number, "^[-+]?[1-9][0-9]*$");
         }
     }
 }
