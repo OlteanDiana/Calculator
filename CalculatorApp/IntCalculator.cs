@@ -1,6 +1,7 @@
 ﻿using CalculatorApp.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace CalculatorApp
 {
@@ -17,50 +18,116 @@ namespace CalculatorApp
 
         public string Add()
         {
+            string sign;
             int compareResult = Compare();
-            if (compareResult == 0)
+            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
+
+            if (compareResult == 0 && checkSignResult != 0)
             {
                 return "0";
             }
 
-            if (_firstOperand.GetSign().Equals(_secondOperand.GetSign()))
+            if (checkSignResult == 0)
             {
-                string sign = _firstOperand.GetSign().Equals('-') ? "-" : string.Empty;
-                Stack<int>  result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
-                            _secondOperand.GetOperand().GetStringAsIntStack());
-                return sign + string.Join(string.Empty, result.ToArray());
+                return ComputeAddResult(1);
             }
 
-            return "Not implemented yet.";
+            if (compareResult == 1)
+            {
+                return ComputeDiffResult(1);
+            }
+
+            return ComputeDiffResult(1);
+        }
+
+        private string ComputeDiffResult(int signOperandOrder = 0)
+        {
+            string sign = GetSign(signOperandOrder);
+            List<int> result = new List<int>();
+
+            if (signOperandOrder == 1)
+            {
+                result = SubstractNumbers(_firstOperand.GetOperandWithoutSign()
+                                                       .GetStringAsIntList(),
+                                          _secondOperand.GetOperandWithoutSign()
+                                                        .GetStringAsIntList());
+                return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
+            }
+
+            result = SubstractNumbers(_secondOperand.GetOperandWithoutSign()
+                                                    .GetStringAsIntList(),
+                                       _firstOperand.GetOperandWithoutSign()
+                                                    .GetStringAsIntList());
+            return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
+        }
+
+        private string ComputeAddResult(int signOperandOrder = 0)
+        {
+            string sign = GetSign(signOperandOrder);
+            Stack<int> result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
+                                           _secondOperand.GetOperand().GetStringAsIntStack());
+
+            return string.Format("{0}{1}", sign, string.Join(string.Empty, result.ToArray()));
+        }
+
+        private string GetSign(int signOperandOrder)
+        {
+            switch (signOperandOrder)
+            {
+                case 1:
+                    {
+                        return _firstOperand.GetSign().Equals('-') ? "-" : string.Empty;
+                    }
+                case 2:
+                    {
+                        return _secondOperand.GetSign().Equals('-') ? "-" : string.Empty;
+                    }
+                default:
+                    {
+                        return string.Empty;
+                    }
+            }
         }
 
         public string Substract()
         {
+            string sign;
             int compareResult = Compare();
-            if (compareResult == 0)
+            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
+
+            if (compareResult == 0 && checkSignResult == 0)
             {
                 return "0";
             }
 
-            if (_firstOperand.GetSign().Equals('+')
-                && _secondOperand.GetSign().Equals('-'))
+            if (checkSignResult == 1)
             {
                 Stack<int> result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
                             _secondOperand.GetOperand().GetStringAsIntStack());
                 return string.Join(string.Empty, result.ToArray());
             }
 
-            if (_firstOperand.GetSign().Equals('+')
-                && _secondOperand.GetSign().Equals('+')
-                && compareResult == 1)
+            if (checkSignResult == -1)
             {
+                Stack<int> result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
+                            _secondOperand.GetOperand().GetStringAsIntStack());
+                return string.Format("{0}{1}", "-", string.Join(string.Empty, result.ToArray()));
+            }
+
+            if (compareResult == 1)
+            {
+                sign = _firstOperand.GetSign().ToString();
                 List<int> result = SubstractNumbers(
                     _firstOperand.GetOperandWithoutSign().GetStringAsIntList(),
                     _secondOperand.GetOperandWithoutSign().GetStringAsIntList());
-                return string.Join(string.Empty, result);
+                return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
             }
 
-            return "Not implemented yet.";
+            sign = _secondOperand.GetSign().ToString();
+            List<int> res = SubstractNumbers(
+                _secondOperand.GetOperandWithoutSign().GetStringAsIntList(),
+                _firstOperand.GetOperandWithoutSign().GetStringAsIntList());
+            return string.Format("{0}{1}", sign, string.Join(string.Empty, res));
         }
 
         #region Comparers
@@ -99,15 +166,8 @@ namespace CalculatorApp
         /// </returns>
         private int Compare()
         {
-            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
-
-            if (checkSignResult != 0)
-            {
-                return checkSignResult;
-            }
-
-            string firstNumber = _firstOperand.GetOperand();
-            string secondNumber = _secondOperand.GetOperand();
+            string firstNumber = _firstOperand.GetOperandWithoutSign();
+            string secondNumber = _secondOperand.GetOperandWithoutSign();
             int lengthCompare = firstNumber.Length
                                 .CompareTo(secondNumber.Length);
             if (lengthCompare != 0)
@@ -116,17 +176,23 @@ namespace CalculatorApp
             }
 
             int index = 0;
+            bool isEqual = false;
+
             while (index < firstNumber.Length)
             {
+                isEqual = false;
+
                 if (firstNumber[index].Equals(secondNumber[index]))
                 {
+                    isEqual = true;
+                    index++;
                     continue;
                 }
 
                 break;
             }
 
-            return firstNumber[index].CompareTo(secondNumber[index]);
+            return isEqual ? 0 : firstNumber[index].CompareTo(secondNumber[index]);
         } 
 
         #endregion
@@ -201,7 +267,7 @@ namespace CalculatorApp
         private List<int> SubstractNumbers(List<int> firstNumber, List<int> secondNumber)
         {
             List<int> result = new List<int>();
-            int firstNumberDigit, secondNumberDigit, index1, index2 , loan = 0;
+            int firstNumberDigit, secondNumberDigit, index1, index2 , loan = 0, currentDigit;
             index1 = firstNumber.Count - 1;
             index2 = secondNumber.Count - 1;
 
@@ -212,7 +278,17 @@ namespace CalculatorApp
 
                 if(firstNumberDigit >= secondNumberDigit && loan == 0)
                 {
-                    result.Add(firstNumberDigit - secondNumberDigit);
+                    currentDigit = firstNumberDigit - secondNumberDigit;
+
+                    if (currentDigit == 0 && index2 != 0)
+                    {
+                        result.Add(currentDigit);
+                    }
+                    else if (currentDigit != 0)
+                    {
+                        result.Add(currentDigit);
+                    }
+
                     index1--;
                     index2--;
                     continue;
@@ -220,7 +296,17 @@ namespace CalculatorApp
 
                 if (firstNumberDigit >= secondNumberDigit + loan)
                 {
-                    result.Add(firstNumberDigit - secondNumberDigit - loan);
+                    currentDigit = firstNumberDigit - secondNumberDigit - loan;
+
+                    if (currentDigit == 0 && index2 != 0)
+                    {
+                        result.Add(currentDigit);
+                    }
+                    else if (currentDigit != 0)
+                    {
+                        result.Add(currentDigit);
+                    }
+
                     index1--;
                     index2--;
                     loan = 0;
@@ -230,25 +316,45 @@ namespace CalculatorApp
                 if(loan == 0)
                 {
                     loan++;
-                    result.Add((firstNumberDigit + 10) - secondNumberDigit);
+                    currentDigit = (firstNumberDigit + 10) - secondNumberDigit;
+
+                    if (currentDigit == 0 && index2 != 0)
+                    {
+                        result.Add(currentDigit);
+                    }
+                    else if (currentDigit != 0)
+                    {
+                        result.Add(currentDigit);
+                    }
+
                     index1--;
                     index2--;
                     continue;
                 }
 
-                result.Add((firstNumberDigit - loan + 10) - secondNumberDigit);
+                currentDigit = (firstNumberDigit - loan + 10) - secondNumberDigit;
+
+                if (currentDigit == 0 && index2 != 0)
+                {
+                    result.Add(currentDigit);
+                }
+                else if (currentDigit != 0)
+                {
+                    result.Add(currentDigit);
+                }
+
                 index1--;
                 index2--;
             }
 
-            int remainingIndex, currentDigit;
+            int remainingIndex;
             remainingIndex = firstNumber.Count - secondNumber.Count - 1;
 
             while (remainingIndex >= 0)
             {
                 firstNumberDigit = firstNumber[remainingIndex];
                 currentDigit = firstNumberDigit - loan;
-                if (currentDigit > 0)
+                if (currentDigit > 0 || remainingIndex > 0)
                 {
                     result.Add(currentDigit);
                 }
