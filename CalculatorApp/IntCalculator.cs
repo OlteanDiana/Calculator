@@ -7,18 +7,27 @@ namespace CalculatorApp
 {
     public class IntCalculator : ICalculator<int>
     {
+        #region Fields
+
         private IOperand<int> _firstOperand;
         private IOperand<int> _secondOperand;
+
+        #endregion
+
+        #region Constructor
 
         public IntCalculator(IOperand<int> firstOperand, IOperand<int> secondOperand)
         {
             _firstOperand = firstOperand;
             _secondOperand = secondOperand;
-        }
+        } 
+
+        #endregion
+
+        #region InterfaceImplementation
 
         public string Add()
         {
-            string sign;
             int compareResult = Compare();
             int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
 
@@ -32,7 +41,7 @@ namespace CalculatorApp
                 return ComputeAddResult(1);
             }
 
-            if (compareResult == 1)
+            if (compareResult > 0)
             {
                 return ComputeDiffResult(1);
             }
@@ -40,7 +49,39 @@ namespace CalculatorApp
             return ComputeDiffResult(1);
         }
 
-        private string ComputeDiffResult(int signOperandOrder = 0)
+        public string Substract()
+        {
+            int compareResult = Compare();
+            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
+
+            if (checkSignResult == 0 && compareResult == 0)
+            {
+                return "0";
+            }
+
+            if (checkSignResult == 0 && compareResult > 0)
+            {
+                return ComputeDiffResult(1);
+            }
+
+            if (checkSignResult == 0 && compareResult < 0)
+            {
+                return ComputeDiffResult(2);
+            }
+
+            if (checkSignResult > 0)
+            {
+                return ComputeAddResult();
+            }
+
+            return ComputeAddResult(2);
+        }
+
+        #endregion
+
+        #region CommonMethods
+
+        private string ComputeDiffResult(int signOperandOrder)
         {
             string sign = GetSign(signOperandOrder);
             List<int> result = new List<int>();
@@ -51,13 +92,15 @@ namespace CalculatorApp
                                                        .GetStringAsIntList(),
                                           _secondOperand.GetOperandWithoutSign()
                                                         .GetStringAsIntList());
-                return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
+            }
+            else
+            {
+                result = SubstractNumbers(_secondOperand.GetOperandWithoutSign()
+                                                        .GetStringAsIntList(),
+                                           _firstOperand.GetOperandWithoutSign()
+                                                        .GetStringAsIntList());
             }
 
-            result = SubstractNumbers(_secondOperand.GetOperandWithoutSign()
-                                                    .GetStringAsIntList(),
-                                       _firstOperand.GetOperandWithoutSign()
-                                                    .GetStringAsIntList());
             return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
         }
 
@@ -80,55 +123,16 @@ namespace CalculatorApp
                     }
                 case 2:
                     {
-                        return _secondOperand.GetSign().Equals('-') ? "-" : string.Empty;
+                        return _secondOperand.GetSign().Equals('+') ? "-" : string.Empty;
                     }
                 default:
                     {
                         return string.Empty;
                     }
             }
-        }
+        } 
 
-        public string Substract()
-        {
-            string sign;
-            int compareResult = Compare();
-            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
-
-            if (compareResult == 0 && checkSignResult == 0)
-            {
-                return "0";
-            }
-
-            if (checkSignResult == 1)
-            {
-                Stack<int> result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
-                            _secondOperand.GetOperand().GetStringAsIntStack());
-                return string.Join(string.Empty, result.ToArray());
-            }
-
-            if (checkSignResult == -1)
-            {
-                Stack<int> result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
-                            _secondOperand.GetOperand().GetStringAsIntStack());
-                return string.Format("{0}{1}", "-", string.Join(string.Empty, result.ToArray()));
-            }
-
-            if (compareResult == 1)
-            {
-                sign = _firstOperand.GetSign().ToString();
-                List<int> result = SubstractNumbers(
-                    _firstOperand.GetOperandWithoutSign().GetStringAsIntList(),
-                    _secondOperand.GetOperandWithoutSign().GetStringAsIntList());
-                return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
-            }
-
-            sign = _secondOperand.GetSign().ToString();
-            List<int> res = SubstractNumbers(
-                _secondOperand.GetOperandWithoutSign().GetStringAsIntList(),
-                _firstOperand.GetOperandWithoutSign().GetStringAsIntList());
-            return string.Format("{0}{1}", sign, string.Join(string.Empty, res));
-        }
+        #endregion
 
         #region Comparers
 
@@ -193,7 +197,7 @@ namespace CalculatorApp
             }
 
             return isEqual ? 0 : firstNumber[index].CompareTo(secondNumber[index]);
-        } 
+        }
 
         #endregion
 
@@ -258,6 +262,8 @@ namespace CalculatorApp
 
         #endregion
 
+        #region SubstractHandlers
+
         /// <summary>
         /// first number is always bigger
         /// </summary>
@@ -267,7 +273,7 @@ namespace CalculatorApp
         private List<int> SubstractNumbers(List<int> firstNumber, List<int> secondNumber)
         {
             List<int> result = new List<int>();
-            int firstNumberDigit, secondNumberDigit, index1, index2 , loan = 0, currentDigit;
+            int firstNumberDigit, secondNumberDigit, index1, index2, loan = 0, currentDigit;
             index1 = firstNumber.Count - 1;
             index2 = secondNumber.Count - 1;
 
@@ -276,7 +282,7 @@ namespace CalculatorApp
                 firstNumberDigit = firstNumber[index1];
                 secondNumberDigit = secondNumber[index2];
 
-                if(firstNumberDigit >= secondNumberDigit && loan == 0)
+                if (firstNumberDigit >= secondNumberDigit && loan == 0)
                 {
                     currentDigit = firstNumberDigit - secondNumberDigit;
 
@@ -313,7 +319,7 @@ namespace CalculatorApp
                     continue;
                 }
 
-                if(loan == 0)
+                if (loan == 0)
                 {
                     loan++;
                     currentDigit = (firstNumberDigit + 10) - secondNumberDigit;
@@ -353,8 +359,18 @@ namespace CalculatorApp
             while (remainingIndex >= 0)
             {
                 firstNumberDigit = firstNumber[remainingIndex];
-                currentDigit = firstNumberDigit - loan;
-                if (currentDigit > 0 || remainingIndex > 0)
+
+                if (loan > 0)
+                {
+                    currentDigit = firstNumberDigit - loan;
+                    loan = 0;
+                }
+                else
+                {
+                    currentDigit = firstNumberDigit;
+                }
+
+                if (currentDigit > 0 || (currentDigit == 0 && remainingIndex > 0))
                 {
                     result.Add(currentDigit);
                 }
@@ -363,6 +379,8 @@ namespace CalculatorApp
             }
 
             return result.AsEnumerable().Reverse().ToList();
-        }
+        } 
+
+        #endregion
     }
 }
