@@ -4,5 +4,7 @@
     {
         string Add();
         string Substract();
+        string Multiply();
+        string Divide();
     }
 }

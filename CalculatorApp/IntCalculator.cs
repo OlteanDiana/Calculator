@@ -11,6 +11,7 @@ namespace CalculatorApp
 
         private IOperand<int> _firstOperand;
         private IOperand<int> _secondOperand;
+        private ICustomComparer<string> _comparer;
 
         #endregion
 
@@ -20,6 +21,7 @@ namespace CalculatorApp
         {
             _firstOperand = firstOperand;
             _secondOperand = secondOperand;
+            _comparer = new IntComparer();
         } 
 
         #endregion
@@ -28,8 +30,10 @@ namespace CalculatorApp
 
         public string Add()
         {
-            int compareResult = Compare();
-            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
+            int compareResult = _comparer.Compare(_firstOperand.GetOperandWithoutSign(), 
+                                                  _secondOperand.GetOperandWithoutSign());
+            int checkSignResult = _comparer.CompareSigns(_firstOperand.GetSign().ToString(), 
+                                                         _secondOperand.GetSign().ToString());
 
             if (compareResult == 0 && checkSignResult != 0)
             {
@@ -46,13 +50,15 @@ namespace CalculatorApp
                 return ComputeDiffResult(1);
             }
 
-            return ComputeDiffResult(1);
+            return ComputeDiffResult(2);
         }
 
         public string Substract()
         {
-            int compareResult = Compare();
-            int checkSignResult = CompareSigns(_firstOperand.GetSign(), _secondOperand.GetSign());
+            int compareResult = _comparer.Compare(_firstOperand.GetOperandWithoutSign(),
+                                                  _secondOperand.GetOperandWithoutSign());
+            int checkSignResult = _comparer.CompareSigns(_firstOperand.GetSign().ToString(),
+                                                        _secondOperand.GetSign().ToString());
 
             if (checkSignResult == 0 && compareResult == 0)
             {
@@ -75,6 +81,33 @@ namespace CalculatorApp
             }
 
             return ComputeAddResult(2);
+        }
+
+        public string Multiply()
+        {
+            char firstNumberSign = _firstOperand.GetSign();
+            char secondNumberSign = _secondOperand.GetSign();
+            string sign = !firstNumberSign.Equals(secondNumberSign) ? "-" : string.Empty;
+            List<int> result = new List<int>();
+
+            result = MultiplyNumbers(_firstOperand.GetOperandWithoutSign()
+                                                       .GetStringAsIntStack(),
+                                     _secondOperand.GetOperandWithoutSign()
+                                                   .GetStringAsIntStack());
+
+            return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
+        }
+
+        public string Divide()
+        {
+            char firstNumberSign = _firstOperand.GetSign();
+            char secondNumberSign = _secondOperand.GetSign();
+            string sign = !firstNumberSign.Equals(secondNumberSign) ? "-" : string.Empty;
+
+            string result = DivideNumbers(_firstOperand.GetOperandWithoutSign(), 
+                _secondOperand.GetOperandWithoutSign());
+
+            return string.Format("{0}{1}", sign, result);
         }
 
         #endregion
@@ -123,7 +156,7 @@ namespace CalculatorApp
                     }
                 case 2:
                     {
-                        return _secondOperand.GetSign().Equals('+') ? "-" : string.Empty;
+                        return _secondOperand.GetSign().Equals('-') ? "-" : string.Empty;
                     }
                 default:
                     {
@@ -131,73 +164,6 @@ namespace CalculatorApp
                     }
             }
         } 
-
-        #endregion
-
-        #region Comparers
-
-        /// <summary>
-        /// compares the sign to check which number is bigger
-        /// </summary>
-        /// <returns>
-        /// 0, if the signs are equal
-        /// 1, if the first number is bigger
-        /// -1, if the second number is bigger
-        /// </returns>
-        private int CompareSigns(char firstNumberSign, char secondNumberSign)
-        {
-            if (firstNumberSign.Equals(secondNumberSign))
-            {
-                return 0;
-            }
-
-            if (!firstNumberSign.Equals(secondNumberSign)
-                && firstNumberSign.Equals('+'))
-            {
-                return 1;
-            }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// compares two large numbers
-        /// </summary>
-        /// <returns>
-        /// 0, if they are equal
-        /// 1, if the first number is bigger
-        /// -1, if the second number is bigger
-        /// </returns>
-        private int Compare()
-        {
-            string firstNumber = _firstOperand.GetOperandWithoutSign();
-            string secondNumber = _secondOperand.GetOperandWithoutSign();
-            int lengthCompare = firstNumber.Length
-                                .CompareTo(secondNumber.Length);
-            if (lengthCompare != 0)
-            {
-                return lengthCompare;
-            }
-
-            int index = 0;
-            bool isEqual = false;
-
-            while (index < firstNumber.Length)
-            {
-                isEqual = false;
-
-                if (firstNumber[index].Equals(secondNumber[index]))
-                {
-                    isEqual = true;
-                    index++;
-                    continue;
-                }
-
-                break;
-            }
-
-            return isEqual ? 0 : firstNumber[index].CompareTo(secondNumber[index]);
-        }
 
         #endregion
 
@@ -286,7 +252,7 @@ namespace CalculatorApp
                 {
                     currentDigit = firstNumberDigit - secondNumberDigit;
 
-                    if (currentDigit == 0 && index2 != 0)
+                    if (currentDigit == 0 && index2 > 0)
                     {
                         result.Add(currentDigit);
                     }
@@ -379,7 +345,170 @@ namespace CalculatorApp
             }
 
             return result.AsEnumerable().Reverse().ToList();
-        } 
+        }
+
+        #endregion
+
+        #region MultiplyHandlers
+
+        private List<int> MultiplyNumbers(Stack<int> first, Stack<int> second)
+        {
+            int[,] matrix = new int[second.Count, first.Count + second.Count];
+            int current = 0, carry = 0, rowIndex = 0, columnIndex = 0;
+
+            foreach (int secondDigit in second)
+            {
+                foreach (int firstDigit in first)
+                {
+                    current = (firstDigit * secondDigit) + carry;
+                    matrix[rowIndex, columnIndex] = current % 10;
+                    columnIndex++;
+                    carry = 0;
+
+                    if (current / 10 > 0)
+                    {
+                        carry = current / 10;
+                    }
+                }
+
+                if (carry > 0)
+                {
+                    matrix[rowIndex, columnIndex] = carry;
+                    carry = 0;
+                }
+
+                rowIndex++;
+                columnIndex = rowIndex;
+            }
+
+            return AddMatrixRows(matrix);
+        }
+
+        private List<int> AddMatrixRows(int[,] matrix)
+        {
+            List<int> result = new List<int>();
+            int rows = matrix.GetUpperBound(0) - matrix.GetLowerBound(0) + 1;
+            int cols = matrix.GetUpperBound(1) - matrix.GetLowerBound(1) + 1;
+            int carry = 0, current;
+
+            for (int j = 0; j < cols; j++)
+            {
+                current = 0;
+
+                for (int i = 0; i < rows; i++)
+                {
+                    current += matrix[i, j];
+                }
+
+                current += carry;
+                carry = current / 10;
+                result.Add(current % 10);
+            }
+
+            return result.TrimZeros();
+        }
+
+        #endregion
+
+        #region DivideHandlers
+
+        private string DivideNumbers(string first, string second)
+        {
+            List<int> integerPart = new List<int>();
+            List<int> decimalPart = new List<int>();
+
+            bool continueDivision = true, isInteger = true;
+            int indexFirst = GetStartIndex(first, second);
+            string divident = first.Substring(0, indexFirst);
+
+            while (continueDivision)
+            {
+                string value;
+                int multiplyIndex = MultiplyUntilBigger(divident, second, out value);
+
+                if (isInteger)
+                {
+                    isInteger = multiplyIndex != 0;
+                    integerPart.Add(multiplyIndex);
+                }
+                else
+                {
+                    decimalPart.Add(multiplyIndex);
+                }
+
+                if ((_comparer.Compare(divident, value) == 0
+                    && indexFirst == first.Length)
+                    || decimalPart.Count > 10)
+                {
+                    continueDivision = false;
+                    continue;
+                }
+
+                List<int> diff = SubstractNumbers(divident.GetStringAsIntList(),
+                                                  value.GetStringAsIntList());
+                bool hasDigitsLeft = indexFirst < first.Length - 1;
+                if (hasDigitsLeft)
+                {
+                    divident = string.Join(string.Empty, diff) + first.ElementAt(indexFirst + 1);
+                    indexFirst++;
+                }
+                else
+                {
+                    isInteger = false;
+                    divident = string.Join(string.Empty, diff) + "0";
+                }
+            }
+
+            if(decimalPart.Count == 0)
+            {
+                return string.Join(string.Empty, integerPart);
+            }
+
+            return string.Format("{0},{1}", string.Join(string.Empty, integerPart),
+                string.Join(string.Empty, decimalPart));
+        }
+
+        private int GetStartIndex(string first, string second)
+        {
+            int index = 0;
+
+            while (index < first.Length)
+            {
+                if (_comparer.Compare(first.Substring(0, index),
+                    second) < 0)
+                {
+                    index++;
+                    continue;
+                }
+
+                break;
+            }
+            
+            return index;
+        }
+
+        private int MultiplyUntilBigger(string first, string second, out string value)
+        {
+            int multiplyIndex = 1;
+            string currentValue = string.Empty;
+
+            if(_comparer.Compare(first, second) < 0)
+            {
+                value = "0";
+                return 0;
+            }
+
+            do
+            {
+                multiplyIndex++;
+                value = currentValue;
+                currentValue = string.Join(string.Empty, 
+                                MultiplyNumbers(second.GetStringAsIntStack(), 
+                                                multiplyIndex.ToString().GetStringAsIntStack()));
+            } while (_comparer.Compare(first, currentValue) >= 0);
+
+            return multiplyIndex - 1;
+        }
 
         #endregion
     }

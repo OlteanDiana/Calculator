@@ -53,9 +53,11 @@
     <Compile Include="CalculatorForm.Designer.cs">
       <DependentUpon>CalculatorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IntComparer.cs" />
+    <Compile Include="Interfaces\ICustomComparer.cs" />
     <Compile Include="Interfaces\INumberValidator.cs" />
     <Compile Include="IntNumberValidator.cs" />
-    <Compile Include="Operand.cs" />
+    <Compile Include="IntOperand.cs" />
     <Compile Include="Interfaces\ICalculator.cs" />
     <Compile Include="Interfaces\IOperand.cs" />
     <Compile Include="Program.cs" />

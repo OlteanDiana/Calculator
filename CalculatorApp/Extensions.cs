@@ -50,5 +50,36 @@ namespace CalculatorApp
 
             return result;
         }
+
+        public static int[] GetRow(this int[,] matrix, int row)
+        {
+            var rowLength = matrix.GetLength(1);
+            var rowVector = new int[rowLength];
+
+            for (var i = 0; i < rowLength; i++)
+                rowVector[i] = matrix[row, i];
+
+            return rowVector;
+        }
+
+        public static List<int> TrimZeros(this List<int> array)
+        {
+            List<int> reverse = array.AsEnumerable().Reverse().ToList();
+            List<int> trimed = new List<int>();
+            bool stopTrim = false;
+
+            foreach(int i in reverse)
+            {
+                if (!stopTrim && i == 0)
+                {
+                    continue;
+                }
+
+                stopTrim = true;
+                trimed.Add(i);
+            }
+
+            return trimed;
+        }
     }
 }

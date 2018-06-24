@@ -6,15 +6,31 @@ namespace CalculatorApp
 {
     public partial class CalculatorForm : Form
     {
+        #region Constants
+
         private const string ADD = "add";
         private const string SUBSTRACT = "substract";
+        private const string MULTIPLY = "multiply";
+        private const string DIVIDE = "divide";
+
+        #endregion
+
+        #region Fields
 
         INumberValidator _validator;
+
+        #endregion
+
+        #region Constructor
 
         public CalculatorForm()
         {
             InitializeComponent();
         }
+
+        #endregion
+
+        #region Events
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
@@ -25,6 +41,20 @@ namespace CalculatorApp
         {
             PerformOperation(SUBSTRACT);
         }
+
+        private void buttonMultiply_Click(object sender, EventArgs e)
+        {
+            PerformOperation(MULTIPLY);
+        }
+
+        private void buttonDivide_Click(object sender, EventArgs e)
+        {
+            PerformOperation(DIVIDE);
+        }
+
+        #endregion
+
+        #region Helpers
 
         private void PerformOperation(string operation)
         {
@@ -52,6 +82,16 @@ namespace CalculatorApp
                     case SUBSTRACT:
                         {
                             textBoxResult.Text = calculator.Substract();
+                            break;
+                        }
+                    case MULTIPLY:
+                        {
+                            textBoxResult.Text = calculator.Multiply();
+                            break;
+                        }
+                    case DIVIDE:
+                        {
+                            textBoxResult.Text = calculator.Divide();
                             break;
                         }
                     default:
@@ -83,6 +123,9 @@ namespace CalculatorApp
             }
 
             return true;
-        }
+        } 
+
+        #endregion
+
     }
 }
