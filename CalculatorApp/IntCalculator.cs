@@ -30,6 +30,12 @@ namespace CalculatorApp
 
         public string Add()
         {
+            if (_firstOperand.GetOperandWithoutSign().Equals("0")
+                && _firstOperand.GetOperandWithoutSign().Equals(_secondOperand.GetOperandWithoutSign()))
+            {
+                return "0";
+            }
+
             int compareResult = _comparer.Compare(_firstOperand.GetOperandWithoutSign(), 
                                                   _secondOperand.GetOperandWithoutSign());
             int checkSignResult = _comparer.CompareSigns(_firstOperand.GetSign().ToString(), 
@@ -42,19 +48,25 @@ namespace CalculatorApp
 
             if (checkSignResult == 0)
             {
-                return ComputeAddResult(1);
+                return ComputeAddResult("+", 1);
             }
 
             if (compareResult > 0)
             {
-                return ComputeDiffResult(1);
+                return ComputeDiffResult("+", 1);
             }
 
-            return ComputeDiffResult(2);
+            return ComputeDiffResult("+", 2);
         }
 
         public string Substract()
         {
+            if (_firstOperand.GetOperandWithoutSign().Equals("0")
+                && _firstOperand.GetOperandWithoutSign().Equals(_secondOperand.GetOperandWithoutSign()))
+            {
+                return "0";
+            }
+
             int compareResult = _comparer.Compare(_firstOperand.GetOperandWithoutSign(),
                                                   _secondOperand.GetOperandWithoutSign());
             int checkSignResult = _comparer.CompareSigns(_firstOperand.GetSign().ToString(),
@@ -67,28 +79,36 @@ namespace CalculatorApp
 
             if (checkSignResult == 0 && compareResult > 0)
             {
-                return ComputeDiffResult(1);
+                return ComputeDiffResult("-", 1);
             }
 
             if (checkSignResult == 0 && compareResult < 0)
             {
-                return ComputeDiffResult(2);
+                return ComputeDiffResult("-", 2);
             }
 
             if (checkSignResult > 0)
             {
-                return ComputeAddResult();
+                return ComputeAddResult("-", 1);
             }
 
-            return ComputeAddResult(2);
+            return ComputeAddResult("-", 2);
         }
 
         public string Multiply()
         {
+            if (_firstOperand.GetOperandWithoutSign().Equals("0")
+                || _secondOperand.GetOperandWithoutSign().Equals("0"))
+            {
+                return "0";
+            }
+
             char firstNumberSign = _firstOperand.GetSign();
             char secondNumberSign = _secondOperand.GetSign();
             string sign = !firstNumberSign.Equals(secondNumberSign) ? "-" : string.Empty;
             List<int> result = new List<int>();
+
+
 
             result = MultiplyNumbers(_firstOperand.GetOperandWithoutSign()
                                                        .GetStringAsIntStack(),
@@ -100,6 +120,17 @@ namespace CalculatorApp
 
         public string Divide()
         {
+            if (_firstOperand.GetOperandWithoutSign().Equals("0")
+                && !_secondOperand.GetOperandWithoutSign().Equals("0"))
+            {
+                return "0";
+            }
+
+            if (_secondOperand.GetOperandWithoutSign().Equals("0"))
+            {
+                throw new Exception("Divide by zero exception!");
+            }
+
             char firstNumberSign = _firstOperand.GetSign();
             char secondNumberSign = _secondOperand.GetSign();
             string sign = !firstNumberSign.Equals(secondNumberSign) ? "-" : string.Empty;
@@ -114,9 +145,9 @@ namespace CalculatorApp
 
         #region CommonMethods
 
-        private string ComputeDiffResult(int signOperandOrder)
+        private string ComputeDiffResult(string operation, int signOperandOrder)
         {
-            string sign = GetSign(signOperandOrder);
+            string sign = GetSign(signOperandOrder, operation);
             List<int> result = new List<int>();
 
             if (signOperandOrder == 1)
@@ -137,16 +168,16 @@ namespace CalculatorApp
             return string.Format("{0}{1}", sign, string.Join(string.Empty, result));
         }
 
-        private string ComputeAddResult(int signOperandOrder = 0)
+        private string ComputeAddResult(string operation, int signOperandOrder)
         {
-            string sign = GetSign(signOperandOrder);
+            string sign = GetSign(signOperandOrder, operation);
             Stack<int> result = AddNumbers(_firstOperand.GetOperand().GetStringAsIntStack(),
                                            _secondOperand.GetOperand().GetStringAsIntStack());
 
             return string.Format("{0}{1}", sign, string.Join(string.Empty, result.ToArray()));
         }
 
-        private string GetSign(int signOperandOrder)
+        private string GetSign(int signOperandOrder, string operation)
         {
             switch (signOperandOrder)
             {
@@ -156,7 +187,9 @@ namespace CalculatorApp
                     }
                 case 2:
                     {
-                        return _secondOperand.GetSign().Equals('-') ? "-" : string.Empty;
+                        return operation.Equals("+")
+                            ? _secondOperand.GetSign().Equals('-') ? "-" : string.Empty
+                            : _secondOperand.GetSign().Equals('+') ? "-" : string.Empty;
                     }
                 default:
                     {
@@ -248,73 +281,11 @@ namespace CalculatorApp
                 firstNumberDigit = firstNumber[index1];
                 secondNumberDigit = secondNumber[index2];
 
-                if (firstNumberDigit >= secondNumberDigit && loan == 0)
-                {
-                    currentDigit = firstNumberDigit - secondNumberDigit;
+                currentDigit = CalculateCurrentDigit(firstNumberDigit, 
+                                                     secondNumberDigit, 
+                                                     ref loan);
 
-                    if (currentDigit == 0 && index2 > 0)
-                    {
-                        result.Add(currentDigit);
-                    }
-                    else if (currentDigit != 0)
-                    {
-                        result.Add(currentDigit);
-                    }
-
-                    index1--;
-                    index2--;
-                    continue;
-                }
-
-                if (firstNumberDigit >= secondNumberDigit + loan)
-                {
-                    currentDigit = firstNumberDigit - secondNumberDigit - loan;
-
-                    if (currentDigit == 0 && index2 != 0)
-                    {
-                        result.Add(currentDigit);
-                    }
-                    else if (currentDigit != 0)
-                    {
-                        result.Add(currentDigit);
-                    }
-
-                    index1--;
-                    index2--;
-                    loan = 0;
-                    continue;
-                }
-
-                if (loan == 0)
-                {
-                    loan++;
-                    currentDigit = (firstNumberDigit + 10) - secondNumberDigit;
-
-                    if (currentDigit == 0 && index2 != 0)
-                    {
-                        result.Add(currentDigit);
-                    }
-                    else if (currentDigit != 0)
-                    {
-                        result.Add(currentDigit);
-                    }
-
-                    index1--;
-                    index2--;
-                    continue;
-                }
-
-                currentDigit = (firstNumberDigit - loan + 10) - secondNumberDigit;
-
-                if (currentDigit == 0 && index2 != 0)
-                {
-                    result.Add(currentDigit);
-                }
-                else if (currentDigit != 0)
-                {
-                    result.Add(currentDigit);
-                }
-
+                result.Add(currentDigit);
                 index1--;
                 index2--;
             }
@@ -325,16 +296,9 @@ namespace CalculatorApp
             while (remainingIndex >= 0)
             {
                 firstNumberDigit = firstNumber[remainingIndex];
-
-                if (loan > 0)
-                {
-                    currentDigit = firstNumberDigit - loan;
-                    loan = 0;
-                }
-                else
-                {
-                    currentDigit = firstNumberDigit;
-                }
+                currentDigit = CalculateCurrentDigit(firstNumberDigit,
+                                                     0,
+                                                     ref loan);
 
                 if (currentDigit > 0 || (currentDigit == 0 && remainingIndex > 0))
                 {
@@ -344,7 +308,36 @@ namespace CalculatorApp
                 remainingIndex--;
             }
 
-            return result.AsEnumerable().Reverse().ToList();
+            return result.TrimZeros();
+        }
+
+        private int CalculateCurrentDigit(int firstNumberDigit, int secondNumberDigit, ref int loan)
+        {
+            int currentDigit = 0;
+
+            if (loan == 0 && firstNumberDigit >= secondNumberDigit)
+            {
+                currentDigit = firstNumberDigit - secondNumberDigit;
+                return currentDigit;
+            }
+
+            if (loan == 0 && firstNumberDigit < secondNumberDigit)
+            {
+                loan = 1;
+                currentDigit = firstNumberDigit + 10 - secondNumberDigit;
+                return currentDigit;
+            }
+
+            if (firstNumberDigit >= secondNumberDigit + loan)
+            {
+                currentDigit = firstNumberDigit - secondNumberDigit - loan;
+                loan = 0;
+                return currentDigit;
+            }
+
+            currentDigit = firstNumberDigit + 10 - secondNumberDigit - loan;
+            loan  = 1;
+            return currentDigit;
         }
 
         #endregion
@@ -428,7 +421,6 @@ namespace CalculatorApp
 
                 if (isInteger)
                 {
-                    isInteger = multiplyIndex != 0;
                     integerPart.Add(multiplyIndex);
                 }
                 else
@@ -446,10 +438,10 @@ namespace CalculatorApp
 
                 List<int> diff = SubstractNumbers(divident.GetStringAsIntList(),
                                                   value.GetStringAsIntList());
-                bool hasDigitsLeft = indexFirst < first.Length - 1;
+                bool hasDigitsLeft = indexFirst < first.Length;
                 if (hasDigitsLeft)
                 {
-                    divident = string.Join(string.Empty, diff) + first.ElementAt(indexFirst + 1);
+                    divident = string.Join(string.Empty, diff) + first.ElementAt(indexFirst);
                     indexFirst++;
                 }
                 else
@@ -490,7 +482,7 @@ namespace CalculatorApp
         private int MultiplyUntilBigger(string first, string second, out string value)
         {
             int multiplyIndex = 1;
-            string currentValue = string.Empty;
+            string currentValue = second;
 
             if(_comparer.Compare(first, second) < 0)
             {
